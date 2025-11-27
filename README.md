@@ -86,7 +86,6 @@ All styling is contained in `App.css`:
 
 For example, the return time is displayed using:
 
-- Italic text  
 - Green color  
 - Small margin for spacing  
 
