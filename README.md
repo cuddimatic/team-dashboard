@@ -121,4 +121,4 @@ src/
 
 ```bash
 npm install
-npm start# team-dashboard
+npm start
