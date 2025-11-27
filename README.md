@@ -1,46 +1,125 @@
-# Getting Started with Create React App
+# Team Availability Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a **React-based dashboard** for monitoring and managing team member availability, tracking tasks completed, and recording return times. It provides a quick overview of team status and allows dynamic updates to each member’s availability.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Table of Contents
 
-### `npm start`
+- [Features](#features)  
+- [Core Logic](#core-logic)  
+- [State Management](#state-management)  
+- [Rules & Implementation](#rules--implementation)  
+- [Styling](#styling)  
+- [Logic Decisions / Design Rationale](#logic-decisions--design-rationale)  
+- [Project Structure](#project-structure)  
+- [How to Run](#how-to-run)  
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+---
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Features
 
-### `npm test`
+- Display **team members** with their roles, status, tasks completed, and return time.  
+- **Filter** team members by status: Available, Busy, Offline, or All.  
+- **Update status** dynamically with buttons for each team member.  
+- **Summary cards** showing counts of Available, Busy, and Offline members.  
+- Persist team state in **localStorage** so that data survives page reloads.  
+- **Dynamic rules**: track when a member comes back online or completes tasks.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Core Logic
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The main logic is implemented in the **`useTeam.ts`** custom hook.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### State Initialization
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The team state is initialized using React's `useState`. If there is a saved state in `localStorage`, it is loaded; otherwise, the default team is used. This ensures that the dashboard preserves data between page reloads.
 
-### `npm run eject`
+### Status Updates
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+When a user updates a team member's status, the following rules are applied:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Offline → Available:** Store the `returnTime` indicating when the member returned.  
+2. **Busy → Available:** Increment the `tasksCompleted` counter.  
+3. **Other changes:** Only update the `status` property.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Filtered views and summary counts are also calculated in this hook.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+---
 
-## Learn More
+## State Management
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **React `useState`** manages the team list and the current filter.  
+- **React `useEffect`** persists the `team` state to `localStorage` whenever it changes.  
+- The `useTeam` hook exposes:
+  - `team` – full list of members  
+  - `filteredTeam` – members filtered by status  
+  - `filter` & `setFilter` – current filter state  
+  - `updateStatus` – function to update member status  
+  - `summary` – counts of available, busy, and offline members  
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+This separation ensures the state logic is decoupled from the UI and makes the code easier to maintain and test.
+
+---
+
+## Rules & Implementation
+
+The following rules govern status transitions:
+
+- **Offline → Available:** Record the return time (`returnTime`).  
+- **Busy → Available:** Increment the `tasksCompleted` counter.  
+- **All other changes:** Update the `status` only.  
+
+The rules are implemented in the `updateStatus` function inside the `useTeam` hook to maintain consistency across the dashboard.
+
+---
+
+## Styling
+
+All styling is contained in `App.css`:
+
+- `.team-card` – card layout for each member  
+- `.status-badge` – color-coded badge based on member status  
+- `.filter-btn` – buttons for filtering the team by status  
+- `.return-time` – display the member's return time in a visually distinct style  
+
+For example, the return time is displayed using:
+
+- Italic text  
+- Green color  
+- Small margin for spacing  
+
+This keeps the UI clean and readable while highlighting key information.
+
+---
+
+## Logic Decisions / Design Rationale
+
+- **UI vs Logic Separation:** `App.tsx` renders the UI, while `useTeam.ts` handles state and rules.  
+- **Type Safety:** TypeScript ensures consistent object structures via `TeamMember` and `Status`.  
+- **Persistence:** `localStorage` prevents loss of data during page reloads.  
+- **Simplicity:** The project is designed to be easy to understand and extend.  
+- **Business Rule Clarity:** The rules for task counting and return time tracking are explicit and predictable.
+
+---
+
+## Project Structure
+
+```text
+src/
+├── App.tsx        # Main app component rendering the dashboard
+├── useTeam.ts     # Custom hook handling team state & logic
+├── types.ts       # Type definitions (TeamMember, Status)
+├── App.css        # Styling for the dashboard
+```
+
+---
+
+## How to Run
+
+1. Install dependencies:
+
+```bash
+npm install
+npm start# team-dashboard
